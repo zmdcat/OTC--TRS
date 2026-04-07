@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定价买入条件单</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
+        }
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            margin-bottom: 0.75rem;
+            padding: 1rem 1.25rem;
+            border: 1px solid #f1f5f9;
+        }
+        .text-green-custom {
+            color: #26d09c;
+        }
+        .bg-blue-custom {
+            background-color: #1a7af8;
+        }
+        .border-blue-custom {
+            border-color: #1a7af8;
+        }
+        .text-blue-custom {
+            color: #1a7af8;
+        }
+        .preset-btn {
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #f1f5f9;
+            border-radius: 0.5rem;
+            color: #333;
+            font-size: 0.875rem;
+        }
+        .preset-btn.active {
+            background-color: #1a7af8;
+            color: white;
+            border-color: #1a7af8;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen max-w-md mx-auto relative bg-slate-50">
+
+    <!-- Header -->
+    <header class="flex items-center px-4 py-3 bg-white sticky top-0 z-10">
+        <button class="text-gray-800">
+            <i class="fa-solid fa-arrow-left text-lg"></i>
+        </button>
+        <h1 class="flex-1 text-center text-lg font-bold text-gray-800">定价买入条件单</h1>
+        <div class="w-6"></div> <!-- Spacer for centering -->
+    </header>
+
+    <main class="flex-1 px-4 py-2 overflow-y-auto pb-32">
+        <!-- Stock Info -->
+        <div class="flex justify-between items-center mb-6 pt-2">
+            <div class="flex items-center">
+                <span class="text-xl font-bold text-gray-900">鸿博股份 002229</span>
+                <i class="fa-solid fa-chevron-right ml-2 text-gray-900 text-sm"></i>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold text-gray-900">18.24</div>
+                <div class="text-sm font-medium text-green-custom">-0.60%</div>
+            </div>
+        </div>
+
+        <!-- Monitoring Price Card -->
+        <div class="card">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fa-regular fa-eye mr-2 text-gray-400"></i>
+                    <span class="text-gray-600">监控价</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <div class="text-xl font-medium text-gray-900">17.7911</div>
+                        <div class="text-xs text-green-custom">-2.80%</div>
+                    </div>
+                    <button class="w-7 h-7 rounded-full bg-blue-custom text-white flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-1 text-xs text-gray-400">当股价 ≤ 监控价时触发买入</div>
+        </div>
+
+        <!-- Order Price Card -->
+        <div class="card">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-gem mr-2 text-gray-400"></i>
+                    <span class="text-gray-600">委托价</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-gray-300">请输入</span>
+                    <button class="w-7 h-7 rounded-full bg-blue-custom text-white flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Quantity Card -->
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-gray-600">委托数量</span>
+                <div class="flex items-center space-x-3">
+                    <span class="text-gray-300">请输入</span>
+                    <button class="w-7 h-7 rounded-full bg-blue-custom text-white flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-5 gap-2">
+                <button class="preset-btn">1/4</button>
+                <button class="preset-btn">1/3</button>
+                <button class="preset-btn active">1/2</button>
+                <button class="preset-btn">3/4</button>
+                <button class="preset-btn">全仓</button>
+            </div>
+        </div>
+
+        <!-- Deadline Card -->
+        <div class="card flex justify-between items-center">
+            <span class="text-gray-600">截止时间</span>
+            <div class="flex items-center text-gray-800">
+                <span class="mr-2">当日收盘前</span>
+                <i class="fa-solid fa-clock text-blue-custom"></i>
+            </div>
+        </div>
+
+        <!-- Holding Info -->
+        <div class="card flex justify-between items-center text-sm py-4">
+            <div>
+                <span class="text-gray-500 mr-2">持仓数量:</span>
+                <span class="text-gray-800">100股</span>
+            </div>
+            <div>
+                <span class="text-gray-500 mr-2">可用购买力:</span>
+                <span class="text-gray-800">3,356.05元</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Button -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white max-w-md mx-auto">
+        <button class="w-full py-3.5 bg-blue-custom text-white font-medium rounded-lg text-lg active:opacity-90 transition-opacity">
+            确认下单
+        </button>
+    </div>
+
+</body>
+</html>
