@@ -32,6 +32,25 @@
         .text-blue-custom {
             color: #1a7af8;
         }
+        .nav-back-btn {
+            position: fixed;
+            top: 20px;
+            left: -10px;
+            z-index: 100;
+            background: #1a7af8;
+            color: white;
+            padding: 6px 16px 6px 24px;
+            border-radius: 0 20px 20px 0;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(26, 122, 248, 0.3);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .nav-back-btn:hover {
+            left: 0;
+            background: #0056b3;
+        }
         .preset-btn {
             height: 3.5rem;
             display: flex;
@@ -50,6 +69,10 @@
     </style>
 </head>
 <body class="flex flex-col min-h-screen max-w-md mx-auto relative bg-slate-50">
+
+    <a href="nav.html" class="nav-back-btn">
+        <i class="fa-solid fa-house mr-1"></i> 返回导航
+    </a>
 
     <!-- Header -->
     <header class="flex items-center px-4 py-3 bg-white sticky top-0 z-10">
