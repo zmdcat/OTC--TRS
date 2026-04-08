@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能导航页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
+        }
+        .nav-card {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .nav-card:active {
+            transform: scale(0.96);
+            background-color: #f9fafb;
+        }
+        .icon-box {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        .bg-blue-soft { background-color: #e0edff; color: #1a7af8; }
+        .bg-green-soft { background-color: #f0fdf4; color: #10b981; }
+        .bg-purple-soft { background-color: #f3e8ff; color: #9333ea; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen max-w-md mx-auto relative px-6 py-12">
+
+    <header class="text-center mb-12">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">OTC--TRS 系统导航</h1>
+        <p class="text-gray-500 text-sm">点击下方入口进入对应功能页面</p>
+    </header>
+
+    <main class="grid grid-cols-2 gap-6">
+        
+        <!-- Buy Page -->
+        <a href="index.html" class="nav-card">
+            <div class="icon-box bg-blue-soft">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <span class="font-bold text-gray-800">定价买入</span>
+            <span class="text-xs text-gray-400 mt-1">创建买入条件单</span>
+        </a>
+
+        <!-- Sell Page -->
+        <a href="sell.html" class="nav-card">
+            <div class="icon-box bg-green-soft">
+                <i class="fa-solid fa-tags"></i>
+            </div>
+            <span class="font-bold text-gray-800">定价卖出</span>
+            <span class="text-xs text-gray-400 mt-1">创建卖出条件单</span>
+        </a>
+
+        <!-- Records Page -->
+        <a href="records.html" class="nav-card col-span-2 flex-row justify-start space-x-6">
+            <div class="icon-box bg-purple-soft mb-0 ml-2">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-bold text-gray-800 text-lg">条件单记录</span>
+                <span class="text-xs text-gray-400 mt-1">查看所有订单状态与历史</span>
+            </div>
+            <i class="fa-solid fa-chevron-right ml-auto mr-2 text-gray-300"></i>
+        </a>
+
+    </main>
+
+    <footer class="mt-auto pt-12 text-center">
+        <div class="inline-flex items-center space-x-2 text-gray-400 text-xs">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>安全交易 · 智能监控</span>
+        </div>
+    </footer>
+
+</body>
+</html>
