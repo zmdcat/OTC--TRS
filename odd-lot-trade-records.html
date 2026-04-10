@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同道证券 - 碎股单成交记录 (1080P版)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-bg: #fff;
+            --sidebar-width: 160px;
+            --primary-color: #2b58f9;
+            --bg-light: #f0f2f5;
+        }
+        body {
+            background-color: var(--bg-light);
+            font-size: 13px;
+            color: #333;
+            height: 100vh;
+            width: 100%;
+            min-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid #e8e8e8;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-area { padding: 15px 10px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .logo-text { color: #b89252; font-weight: bold; font-size: 14px; white-space: nowrap; }
+
+        .nav-link { color: #555; padding: 10px 12px; font-size: 12px; }
+        .nav-link i { font-size: 14px; margin-right: 6px; }
+        .nav-link.active { background: #e6f7ff; color: var(--primary-color); border-right: 3px solid var(--primary-color); }
+
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); height: 100vh; display: flex; flex-direction: column; }
+
+        .header-bar { height: 48px; background: #fff; display: flex; align-items: center; justify-content: flex-end; padding: 0 24px; border-bottom: 1px solid #e8e8e8; }
+
+        .content-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+        .filter-card { background: #fff; padding: 16px 24px; border-radius: 4px; margin-bottom: 16px; }
+
+        .table-card { background: #fff; padding: 16px; border-radius: 4px; overflow: hidden; }
+        .table-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #f0f0f0;
+        }
+
+        .table-custom { min-width: 1500px; margin-bottom: 0; }
+        .table-custom thead th { background-color: #fafafa; white-space: nowrap; padding: 12px 15px; }
+        .table-custom tbody td { white-space: nowrap; padding: 10px 15px; vertical-align: middle; }
+        .table-custom tbody td.detail-cell { white-space: normal; line-height: 1.5; font-family: monospace; }
+
+        .badge-market { padding: 3px 10px; border-radius: 2px; font-size: 12px; }
+        .badge-hk { background: #fff1f0; border: 1px solid #ffa39e; color: #cf1322; }
+        .badge-us { background: #f0f5ff; border: 1px solid #adc6ff; color: #1d39c4; }
+
+        .action-link { cursor: pointer; color: var(--primary-color); text-decoration: none; margin: 0 5px; }
+        .action-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-area">
+            <div class="logo-text"><i class="bi bi-shield-check"></i> 同道证券</div>
+        </div>
+        <nav class="nav flex-column mt-2">
+            <div class="px-3 py-2 text-muted" style="font-size: 11px; letter-spacing: 1px;">交易管理</div>
+            <a class="nav-link active" href="#">
+                <i class="bi bi-list-stars"></i> 碎股单记录
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header class="header-bar">
+            <div class="d-flex align-items-center gap-4 text-muted">
+                <i class="bi bi-bell"></i>
+                <i class="bi bi-gear"></i>
+                <div class="d-flex align-items-center border-start ps-3">
+                    <span class="me-2">管理员 (Admin)</span>
+                    <i class="bi bi-person-circle fs-5"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-sm btn-light border px-3">客户列表</button>
+                <button class="btn btn-sm btn-primary px-3" style="background: #e6f7ff; color:#1890ff; border-color:#91d5ff;">碎股单成交记录</button>
+            </div>
+
+            <div class="filter-card">
+                <form class="row gx-3 gy-2 align-items-end">
+                    <div class="col-auto" style="width: 180px;">
+                        <label class="form-label text-muted small">TRS 账户号</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="模糊搜索">
+                    </div>
+                    <div class="col-auto" style="width: 150px;">
+                        <label class="form-label text-muted small">客户姓名</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="请输入">
+                    </div>
+                    <div class="col-auto" style="width: 150px;">
+                        <label class="form-label text-muted small">标的代码</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="代码/简称">
+                    </div>
+                    <div class="col-auto" style="width: 120px;">
+                        <label class="form-label text-muted small">市场</label>
+                        <select class="form-select form-select-sm">
+                            <option>全部</option>
+                            <option>港股</option>
+                            <option>美股</option>
+                        </select>
+                    </div>
+                    <div class="col-auto" style="width: 280px;">
+                        <label class="form-label text-muted small">创建时间</label>
+                        <div class="input-group input-group-sm">
+                            <input type="date" class="form-control">
+                            <span class="input-group-text bg-white border-start-0 border-end-0">-</span>
+                            <input type="date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-auto flex-grow-1 text-end">
+                        <button type="button" class="btn btn-sm btn-light border me-2">重置</button>
+                        <button type="submit" class="btn btn-sm btn-primary px-4"><i class="bi bi-search me-1"></i>查询</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold">成交数据详情</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-light border">导出报表</button>
+                    </div>
+                </div>
+
+                <div class="table-scroll-container">
+                    <table class="table table-hover table-custom">
+                        <thead>
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>TRS 账户号</th>
+                                <th>客户姓名</th>
+                                <th>标的代码</th>
+                                <th>市场</th>
+                                <th class="text-end">成交价</th>
+                                <th class="text-end">成交数量</th>
+                                <th class="text-end">成交总额</th>
+                                <th width="240">成交明细</th>
+                                <th>创建时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <script>
+                                const data = [
+                                    {id:1, trs:'G80000015', name:'赵宇寰', code:'00988.HK', market:'港股', price:'102.50', qty:'50', time:'2026-04-10 10:44', note:'分红碎股自动处理', mClass:'badge-hk'},
+                                    {id:2, trs:'G80000004', name:'茹茹', code:'AAPL.US', market:'美股', price:'182.12', qty:'125', time:'2026-04-10 09:30', note:'客户手动平仓', mClass:'badge-us'}
+                                ];
+                                for(let i=0; i<10; i++) {
+                                    const item = data[i%2];
+                                    const qty = Math.max(0, Math.abs(Number.parseFloat(item.qty)));
+                                    const price = Math.max(0, Number.parseFloat(item.price));
+                                    const total = Number.isFinite(price) && Number.isFinite(qty) ? (price * qty).toFixed(2) : '-';
+                                    document.write(`
+                                        <tr>
+                                            <td class="text-muted">${i+1}</td>
+                                            <td class="fw-bold">${item.trs}</td>
+                                            <td>${item.name}</td>
+                                            <td class="text-primary">${item.code}</td>
+                                            <td><span class="badge-market ${item.mClass}">${item.market}</span></td>
+                                            <td class="text-end">${Number.isFinite(price) ? price.toFixed(2) : '-'}</td>
+                                            <td class="text-end">${Number.isFinite(qty) ? qty : '-'}</td>
+                                            <td class="text-end fw-bold">¥ ${total}</td>
+                                            <td class="detail-cell text-muted small">
+                                                AAA-T7454554-30<br>
+                                                AAA-T7454554-30<br>
+                                                AAA-T7454554-30
+                                            </td>
+                                            <td>${item.time}</td>
+                                        </tr>
+                                    `);
+                                }
+                            </script>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted small">显示第 1 到 10 条，共 1557 条记录</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <select class="form-select form-select-sm" style="width: 100px;">
+                            <option>20 条/页</option>
+                            <option>50 条/页</option>
+                        </select>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled"><a class="page-link">上一页</a></li>
+                                <li class="page-item active"><a class="page-link">1</a></li>
+                                <li class="page-item"><a class="page-link">2</a></li>
+                                <li class="page-item"><a class="page-link">下一页</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

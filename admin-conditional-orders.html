@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>条件单管理 - 交易后台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --error-color: #ff4d4f;
+            --text-main: #262626;
+            --text-secondary: #595959;
+            --bg-gray: #f0f2f5;
+            --border-color: #f0f0f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-gray);
+            margin: 0;
+            padding: 20px;
+            font-size: 14px;
+            color: var(--text-main);
+            min-width: 1200px;
+        }
+
+        .nav-back-btn {
+            position: fixed;
+            top: 20px;
+            left: -10px;
+            z-index: 100;
+            background: #1a7af8;
+            color: white;
+            padding: 6px 16px 6px 24px;
+            border-radius: 0 20px 20px 0;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(26, 122, 248, 0.3);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .nav-back-btn:hover {
+            left: 0;
+            background: #0056b3;
+        }
+
+        .main-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .tabs {
+            margin-bottom: 24px;
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            margin-right: 4px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background: #fff;
+            color: var(--primary-color);
+            border-top: 2px solid var(--primary-color);
+            font-weight: 600;
+            margin-top: -1px;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 4px;
+            margin-bottom: 24px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .filter-group input, .filter-group select {
+            width: 160px;
+            height: 32px;
+            padding: 4px 11px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        .filter-group input:focus { border-color: var(--primary-color); }
+
+        .btn {
+            height: 32px;
+            padding: 0 15px;
+            font-size: 14px;
+            border-radius: 2px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        .action-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        thead th {
+            background: #fafafa;
+            padding: 16px 12px;
+            border-bottom: 2px solid var(--border-color);
+            text-align: left;
+            font-weight: 600;
+        }
+
+        tbody td {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border-color);
+            word-wrap: break-word;
+        }
+
+        tbody tr:hover { background: #e6f7ff66; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 8px;
+            height: 22px;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+        .status-monitoring { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .status-triggered { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-canceled { background: #f5f5f5; color: #8c8c8c; border: 1px solid #d9d9d9; }
+        
+        .type-label {
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+        .type-buy { background: #fff1f0; color: #f5222d; }
+        .type-sell { background: #f6ffed; color: #52c41a; }
+
+        .action-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        .action-link.delete { color: var(--error-color); }
+
+        .pagination {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+            color: var(--text-secondary);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 1000;
+        }
+        .hidden { display: none !important; }
+        .modal-dialog {
+            width: 860px;
+            max-width: calc(100vw - 48px);
+            max-height: calc(100vh - 48px);
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-dialog.modal-sm { width: 520px; }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border-color);
+            background: #fbfbfb;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .modal-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        .modal-subtitle {
+            padding: 12px 18px 0 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        .modal-body {
+            padding: 16px 18px 18px 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 14px;
+            overflow: auto;
+        }
+        .modal-body.modal-body-single {
+            grid-template-columns: 1fr;
+        }
+        .edit-card {
+            border: 1px solid #eef2f6;
+            border-radius: 14px;
+            padding: 14px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            min-width: 0;
+        }
+        .edit-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .edit-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1 1 0;
+        }
+        .edit-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #f3f6ff;
+            color: #2f6fed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex: 0 0 auto;
+        }
+        .edit-meta { min-width: 0; }
+        .edit-label {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1f2937;
+            line-height: 1.2;
+        }
+        .edit-hint {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #8a8a8a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .edit-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 1 auto;
+            min-width: 0;
+            justify-content: flex-end;
+        }
+        .edit-value {
+            text-align: right;
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.1;
+        }
+        .edit-value-sub {
+            text-align: right;
+            font-size: 12px;
+            color: #10b981;
+            margin-top: 6px;
+        }
+        .edit-plus {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            border: none;
+            background: #1677ff;
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 18px rgba(22,119,255,0.22);
+        }
+        .edit-input {
+            width: clamp(110px, 18vw, 160px);
+            height: 36px;
+            border: 1px solid #d9d9d9;
+            border-radius: 10px;
+            padding: 0 12px;
+            font-size: 14px;
+            outline: none;
+            text-align: right;
+        }
+        .edit-input:focus { border-color: var(--primary-color); }
+        .edit-error {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--error-color);
+            display: none;
+        }
+        .qty-quick {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+            gap: 10px;
+        }
+        .qty-btn {
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid #e6eef8;
+            background: #fff;
+            cursor: pointer;
+            font-weight: 800;
+            color: #4b5563;
+        }
+        .qty-btn.active {
+            border-color: #1677ff;
+            background: #1677ff;
+            color: #fff;
+        }
+        .meta-bar {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            color: #6b7280;
+            font-size: 13px;
+            gap: 12px;
+        }
+        .meta-bar strong { color: #111827; }
+        .modal-footer {
+            padding: 14px 18px 16px 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+            background: #fbfbfb;
+        }
+        .btn-danger {
+            background: var(--error-color);
+            border-color: var(--error-color);
+            color: #fff;
+        }
+        .confirm-box {
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #fff1f0;
+            border: 1px solid #ffccc7;
+            color: #7a1f20;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .confirm-check {
+            margin-top: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: #374151;
+        }
+        .confirm-check input { margin-top: 2px; }
+
+        @media (max-width: 920px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+            .edit-row {
+                flex-wrap: wrap;
+                align-items: flex-start;
+            }
+            .edit-right {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<a href="nav.html" class="nav-back-btn">
+    <i class="fa-solid fa-house" style="margin-right: 4px;"></i> 返回导航
+</a>
+
+<div class="main-card">
+    <div class="tabs">
+        <div class="tab">客户列表</div>
+        <div class="tab">交易记录列表</div>
+        <div class="tab active">条件单管理列表</div>
+    </div>
+
+    <div class="filter-form">
+        <div class="filter-group">
+            <label>TRS 账户号</label>
+            <input type="text" placeholder="账户号查询">
+        </div>
+        <div class="filter-group">
+            <label>资金账户号</label>
+            <input type="text" placeholder="资金账户查询">
+        </div>
+        <div class="filter-group">
+            <label>标的代码</label>
+            <input type="text" placeholder="代码/简称">
+        </div>
+        <div class="filter-group">
+            <label>条件单状态</label>
+            <select>
+                <option>全部</option>
+                <option>监控中</option>
+                <option>已触发</option>
+                <option>已撤销</option>
+                <option>已失效</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>类型</label>
+            <select>
+                <option>全部</option>
+                <option>定价买入</option>
+                <option>定价卖出</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>创建时间</label>
+            <input type="date">
+        </div>
+        <div class="filter-group" style="flex-direction: row; gap: 10px;">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn">重置</button>
+        </div>
+    </div>
+
+    <div class="action-container">
+        <button class="btn">导出 Excel</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 140px;">TRS 账户号</th>
+                    <th style="width: 140px;">资金账户号</th>
+                    <th style="width: 160px;">标的信息</th>
+                    <th style="width: 100px;">类型</th>
+                    <th style="width: 120px;">监控价格</th>
+                    <th style="width: 120px;">委托价格</th>
+                    <th style="width: 100px;">委托数量</th>
+                    <th style="width: 100px;">状态</th>
+                    <th style="width: 180px;">创建时间</th>
+                    <th style="width: 160px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>G80000015</td>
+                    <td>F20260408</td>
+                    <td><b>腾讯控股</b><br><span style="color: #999; font-size: 12px;">00700.HK</span></td>
+                    <td><span class="type-label type-buy">定价买入</span></td>
+                    <td style="color: #f5222d; font-weight: 500;">≤ 380.00</td>
+                    <td>379.50</td>
+                    <td>1,000</td>
+                    <td><span class="status-badge status-monitoring">监控中</span></td>
+                    <td style="font-size: 13px; color: #888;">2026-04-10 10:30:00</td>
+                    <td>
+                        <a class="action-link" data-action="detail">详情</a>
+                        <a class="action-link" data-action="edit">修改</a>
+                        <a class="action-link delete" data-action="cancel">撤销</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>G80000004</td>
+                    <td>F20260318</td>
+                    <td><b>万科 A</b><br><span style="color: #999; font-size: 12px;">000002.SZ</span></td>
+                    <td><span class="type-label type-sell">定价卖出</span></td>
+                    <td style="color: #52c41a; font-weight: 500;">≥ 12.50</td>
+                    <td>12.55</td>
+                    <td>10,000</td>
+                    <td><span class="status-badge status-triggered">已触发</span></td>
+                    <td style="font-size: 13px; color: #888;">2026-04-09 14:15:22</td>
+                    <td>
+                        <a class="action-link" data-action="detail">详情</a>
+                        <span style="color: #ccc; cursor: not-allowed; margin-right: 15px;">修改</span>
+                        <span style="color: #ccc; cursor: not-allowed;">撤销</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <span>共 1557 条记录</span>
+        <span style="margin-left: 20px;">第 1 / 78 页</span>
+    </div>
+</div>
+
+<div id="editModalBackdrop" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <div class="modal-title">修改条件单</div>
+            <button id="editModalClose" class="modal-close" type="button" aria-label="关闭">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="editModalSubtitle" class="modal-subtitle">-</div>
+        <div class="modal-body">
+            <div class="edit-card">
+                <div class="edit-row">
+                    <div class="edit-left">
+                        <div class="edit-icon"><i class="fa-regular fa-eye"></i></div>
+                        <div class="edit-meta">
+                            <div class="edit-label">监控价</div>
+                            <div id="editMonitorHint" class="edit-hint">-</div>
+                        </div>
+                    </div>
+                    <div class="edit-right">
+                        <input id="editMonitorPrice" class="edit-input" inputmode="decimal" autocomplete="off" placeholder="请输入">
+                        <button id="editMonitorPlus" class="edit-plus" type="button" aria-label="增加监控价">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="editMonitorError" class="edit-error">请输入有效的监控价</div>
+            </div>
+
+            <div class="edit-card">
+                <div class="edit-row">
+                    <div class="edit-left">
+                        <div class="edit-icon" style="background:#fff7ed;color:#f97316;"><i class="fa-regular fa-gem"></i></div>
+                        <div class="edit-meta">
+                            <div class="edit-label">委托价</div>
+                            <div class="edit-hint">触发后以该价格发起委托</div>
+                        </div>
+                    </div>
+                    <div class="edit-right">
+                        <input id="editOrderPrice" class="edit-input" inputmode="decimal" autocomplete="off" placeholder="请输入">
+                        <button id="editOrderPlus" class="edit-plus" type="button" aria-label="增加委托价">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="editOrderError" class="edit-error">请输入有效的委托价</div>
+            </div>
+
+            <div class="edit-card" style="grid-column: 1 / -1;">
+                <div class="edit-row" style="align-items:flex-start;">
+                    <div class="edit-left">
+                        <div class="edit-icon" style="background:#eff6ff;color:#1677ff;"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="edit-meta">
+                            <div class="edit-label">委托数量</div>
+                            <div class="edit-hint">支持快捷比例选择</div>
+                        </div>
+                    </div>
+                    <div class="edit-right" style="flex-direction:column;align-items:flex-end;gap:8px;">
+                        <input id="editOrderQty" class="edit-input" inputmode="numeric" autocomplete="off" placeholder="请输入">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <div style="text-align:right;">
+                                <div id="editLastPrice" class="edit-value" style="font-size:16px;">-</div>
+                                <div id="editLastChange" class="edit-value-sub">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="qty-quick" id="qtyQuick">
+                    <button class="qty-btn" type="button" data-fraction="0.25">1/4</button>
+                    <button class="qty-btn" type="button" data-fraction="0.3333333">1/3</button>
+                    <button class="qty-btn active" type="button" data-fraction="0.5">1/2</button>
+                    <button class="qty-btn" type="button" data-fraction="0.75">3/4</button>
+                    <button class="qty-btn" type="button" data-fraction="1">全仓</button>
+                </div>
+                <div id="editQtyError" class="edit-error">请输入有效的委托数量</div>
+                <div class="meta-bar">
+                    <div>持仓数量：<strong id="editHoldingQty">-</strong>股</div>
+                    <div>可用购买力：<strong id="editBuyingPower">-</strong>元</div>
+                </div>
+            </div>
+
+            <div class="edit-card" style="grid-column: 1 / -1;">
+                <div class="edit-row">
+                    <div class="edit-left">
+                        <div class="edit-icon" style="background:#f0fdf4;color:#10b981;"><i class="fa-regular fa-clock"></i></div>
+                        <div class="edit-meta">
+                            <div class="edit-label">截止时间</div>
+                            <div class="edit-hint">到期未触发则自动失效</div>
+                        </div>
+                    </div>
+                    <div class="edit-right">
+                        <div class="edit-value" style="font-size:16px;">当日收盘前</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="editModalCancel" class="btn" type="button">取消</button>
+            <button id="editModalSave" class="btn btn-primary" type="button">保存修改</button>
+        </div>
+    </div>
+</div>
+
+<div id="cancelModalBackdrop" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <div class="modal-title">撤销条件单</div>
+            <button id="cancelModalClose" class="modal-close" type="button" aria-label="关闭">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-subtitle" id="cancelModalSubtitle">-</div>
+        <div class="modal-body modal-body-single">
+            <div class="confirm-box">
+                撤销后该条件单将停止监控，且不可恢复。请确认是否继续。
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="cancelModalCancel" class="btn" type="button">取消</button>
+            <button id="cancelModalNext" class="btn btn-primary" type="button">继续</button>
+        </div>
+    </div>
+</div>
+
+<div id="cancelConfirmBackdrop" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <div class="modal-title">二次确认撤销</div>
+            <button id="cancelConfirmClose" class="modal-close" type="button" aria-label="关闭">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-subtitle" id="cancelConfirmSubtitle">-</div>
+        <div class="modal-body modal-body-single">
+            <div class="confirm-box">
+                请再次确认：你将撤销该条件单。确认后立即生效。
+            </div>
+            <label class="confirm-check">
+                <input id="cancelConfirmCheck" type="checkbox">
+                <span>我已确认要撤销该条件单，并知晓撤销后不可恢复。</span>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button id="cancelConfirmBack" class="btn" type="button">返回</button>
+            <button id="cancelConfirmOk" class="btn btn-danger" type="button" disabled>确认撤销</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const editModalBackdrop = document.getElementById('editModalBackdrop');
+    const editModalClose = document.getElementById('editModalClose');
+    const editModalCancel = document.getElementById('editModalCancel');
+    const editModalSave = document.getElementById('editModalSave');
+    const editModalSubtitle = document.getElementById('editModalSubtitle');
+
+    const editMonitorHint = document.getElementById('editMonitorHint');
+    const editMonitorPrice = document.getElementById('editMonitorPrice');
+    const editOrderPrice = document.getElementById('editOrderPrice');
+    const editOrderQty = document.getElementById('editOrderQty');
+
+    const editMonitorPlus = document.getElementById('editMonitorPlus');
+    const editOrderPlus = document.getElementById('editOrderPlus');
+
+    const editMonitorError = document.getElementById('editMonitorError');
+    const editOrderError = document.getElementById('editOrderError');
+    const editQtyError = document.getElementById('editQtyError');
+
+    const editLastPrice = document.getElementById('editLastPrice');
+    const editLastChange = document.getElementById('editLastChange');
+    const editHoldingQty = document.getElementById('editHoldingQty');
+    const editBuyingPower = document.getElementById('editBuyingPower');
+
+    const cancelModalBackdrop = document.getElementById('cancelModalBackdrop');
+    const cancelModalClose = document.getElementById('cancelModalClose');
+    const cancelModalCancel = document.getElementById('cancelModalCancel');
+    const cancelModalNext = document.getElementById('cancelModalNext');
+    const cancelModalSubtitle = document.getElementById('cancelModalSubtitle');
+
+    const cancelConfirmBackdrop = document.getElementById('cancelConfirmBackdrop');
+    const cancelConfirmClose = document.getElementById('cancelConfirmClose');
+    const cancelConfirmBack = document.getElementById('cancelConfirmBack');
+    const cancelConfirmOk = document.getElementById('cancelConfirmOk');
+    const cancelConfirmCheck = document.getElementById('cancelConfirmCheck');
+    const cancelConfirmSubtitle = document.getElementById('cancelConfirmSubtitle');
+
+    const qtyQuick = document.getElementById('qtyQuick');
+
+    let activeRow = null;
+    let activeHoldingQty = 100;
+
+    function showBackdrop(backdrop) {
+        [editModalBackdrop, cancelModalBackdrop, cancelConfirmBackdrop].forEach((el) => el.classList.add('hidden'));
+        backdrop.classList.remove('hidden');
+        backdrop.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideAllBackdrops() {
+        [editModalBackdrop, cancelModalBackdrop, cancelConfirmBackdrop].forEach((el) => {
+            el.classList.add('hidden');
+            el.setAttribute('aria-hidden', 'true');
+        });
+        document.body.style.overflow = '';
+        cancelConfirmCheck.checked = false;
+        cancelConfirmOk.disabled = true;
+    }
+
+    function parseNumber(text) {
+        const cleaned = String(text || '').replace(/,/g, '').replace(/[^\d.]/g, '');
+        const value = Number.parseFloat(cleaned);
+        return Number.isFinite(value) ? value : null;
+    }
+
+    function setError(el, visible, msg) {
+        if (!el) return;
+        if (msg) el.textContent = msg;
+        el.style.display = visible ? 'block' : 'none';
+    }
+
+    function stepInput(input, step) {
+        const current = parseNumber(input.value);
+        const next = (current ?? 0) + step;
+        input.value = next.toFixed(2);
+        input.focus();
+    }
+
+    function clearQuickActive() {
+        qtyQuick.querySelectorAll('.qty-btn').forEach((btn) => btn.classList.remove('active'));
+    }
+
+    function applyQuickQty(fraction) {
+        const next = Math.max(1, Math.floor(activeHoldingQty * fraction));
+        editOrderQty.value = String(next);
+        setError(editQtyError, false);
+    }
+
+    function buildSubtitle(row) {
+        const trs = row.children[0]?.textContent?.trim() || '-';
+        const fund = row.children[1]?.textContent?.trim() || '-';
+        const symbolCell = row.children[2];
+        const symbolName = symbolCell?.querySelector('b')?.textContent?.trim() || '-';
+        const symbolCode = symbolCell?.querySelector('span')?.textContent?.trim() || '-';
+        return `${trs} · ${fund} · ${symbolName} (${symbolCode})`;
+    }
+
+    function openEditModal(row) {
+        activeRow = row;
+        editModalSubtitle.textContent = buildSubtitle(row);
+
+        const typeText = row.querySelector('.type-label')?.textContent?.trim() || '';
+        const monitorText = row.children[4]?.textContent?.trim() || '';
+        const monitorValue = parseNumber(monitorText);
+        const orderPriceValue = parseNumber(row.children[5]?.textContent?.trim() || '');
+        const qtyValue = parseNumber(row.children[6]?.textContent?.trim() || '');
+
+        const isBuy = typeText.includes('买');
+        editMonitorHint.textContent = isBuy ? '当股价 ≤ 监控价时触发买入' : '当股价 ≥ 监控价时触发卖出';
+
+        editMonitorPrice.value = monitorValue == null ? '' : monitorValue.toFixed(2);
+        editOrderPrice.value = orderPriceValue == null ? '' : orderPriceValue.toFixed(2);
+        editOrderQty.value = qtyValue == null ? '' : String(Math.floor(qtyValue));
+
+        setError(editMonitorError, false);
+        setError(editOrderError, false);
+        setError(editQtyError, false);
+
+        activeHoldingQty = isBuy ? 100 : 10000;
+        editHoldingQty.textContent = String(activeHoldingQty);
+        editBuyingPower.textContent = isBuy ? '3,356.05' : '0.00';
+        editLastPrice.textContent = monitorValue == null ? '-' : (monitorValue - 0.08).toFixed(4);
+        editLastChange.textContent = '-2.80%';
+
+        clearQuickActive();
+        qtyQuick.querySelector('.qty-btn[data-fraction="0.5"]')?.classList.add('active');
+        applyQuickQty(0.5);
+
+        showBackdrop(editModalBackdrop);
+        editMonitorPrice.focus();
+    }
+
+    function validateEditForm() {
+        const monitor = parseNumber(editMonitorPrice.value);
+        const orderPrice = parseNumber(editOrderPrice.value);
+        const qty = parseNumber(editOrderQty.value);
+
+        let ok = true;
+        if (monitor == null || monitor <= 0) {
+            setError(editMonitorError, true, '请输入有效的监控价');
+            ok = false;
+        } else {
+            setError(editMonitorError, false);
+        }
+        if (orderPrice == null || orderPrice <= 0) {
+            setError(editOrderError, true, '请输入有效的委托价');
+            ok = false;
+        } else {
+            setError(editOrderError, false);
+        }
+        if (qty == null || qty <= 0) {
+            setError(editQtyError, true, '请输入有效的委托数量');
+            ok = false;
+        } else {
+            setError(editQtyError, false);
+        }
+
+        return ok;
+    }
+
+    function applyEditToRow(row) {
+        const monitor = parseNumber(editMonitorPrice.value);
+        const orderPrice = parseNumber(editOrderPrice.value);
+        const qty = parseNumber(editOrderQty.value);
+        if (monitor == null || orderPrice == null || qty == null) return;
+
+        const typeText = row.querySelector('.type-label')?.textContent?.trim() || '';
+        const isBuy = typeText.includes('买');
+        row.children[4].textContent = `${isBuy ? '≤' : '≥'} ${monitor.toFixed(2)}`;
+        row.children[5].textContent = orderPrice.toFixed(2);
+        row.children[6].textContent = Math.floor(qty).toLocaleString('en-US');
+    }
+
+    function openCancelStep1(row) {
+        activeRow = row;
+        cancelModalSubtitle.textContent = buildSubtitle(row);
+        showBackdrop(cancelModalBackdrop);
+    }
+
+    function openCancelStep2() {
+        cancelConfirmSubtitle.textContent = cancelModalSubtitle.textContent;
+        cancelConfirmCheck.checked = false;
+        cancelConfirmOk.disabled = true;
+        showBackdrop(cancelConfirmBackdrop);
+    }
+
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        const action = target.getAttribute('data-action');
+        const row = target.closest('tr');
+        if (!row) return;
+
+        if (action === 'edit') openEditModal(row);
+        if (action === 'cancel') openCancelStep1(row);
+        if (action === 'detail') {
+            alert('详情：原型示意（可替换为抽屉/弹窗/新页面）');
+        }
+    });
+
+    editModalClose.addEventListener('click', hideAllBackdrops);
+    editModalCancel.addEventListener('click', hideAllBackdrops);
+    editModalBackdrop.addEventListener('click', (e) => { if (e.target === editModalBackdrop) hideAllBackdrops(); });
+
+    cancelModalClose.addEventListener('click', hideAllBackdrops);
+    cancelModalCancel.addEventListener('click', hideAllBackdrops);
+    cancelModalBackdrop.addEventListener('click', (e) => { if (e.target === cancelModalBackdrop) hideAllBackdrops(); });
+    cancelModalNext.addEventListener('click', openCancelStep2);
+
+    cancelConfirmClose.addEventListener('click', hideAllBackdrops);
+    cancelConfirmBack.addEventListener('click', () => showBackdrop(cancelModalBackdrop));
+    cancelConfirmBackdrop.addEventListener('click', (e) => { if (e.target === cancelConfirmBackdrop) hideAllBackdrops(); });
+    cancelConfirmCheck.addEventListener('change', () => { cancelConfirmOk.disabled = !cancelConfirmCheck.checked; });
+    cancelConfirmOk.addEventListener('click', () => {
+        if (!activeRow) return;
+        const statusCell = activeRow.children[7];
+        statusCell.innerHTML = '<span class="status-badge status-canceled">已撤销</span>';
+        const actionsCell = activeRow.children[9];
+        actionsCell.innerHTML = '<a class="action-link" data-action="detail">详情</a><span style="color: #ccc; cursor: not-allowed; margin-right: 15px;">修改</span><span style="color: #ccc; cursor: not-allowed;">撤销</span>';
+        hideAllBackdrops();
+    });
+
+    editMonitorPlus.addEventListener('click', () => stepInput(editMonitorPrice, 0.01));
+    editOrderPlus.addEventListener('click', () => stepInput(editOrderPrice, 0.01));
+
+    qtyQuick.addEventListener('click', (e) => {
+        const btn = e.target.closest('.qty-btn');
+        if (!btn) return;
+        clearQuickActive();
+        btn.classList.add('active');
+        const fraction = Number.parseFloat(btn.getAttribute('data-fraction') || '0');
+        if (!Number.isFinite(fraction) || fraction <= 0) return;
+        applyQuickQty(fraction);
+    });
+
+    editOrderQty.addEventListener('input', () => {
+        const qty = parseNumber(editOrderQty.value);
+        if (qty == null || qty <= 0) setError(editQtyError, true, '请输入有效的委托数量');
+        else setError(editQtyError, false);
+    });
+
+    editModalSave.addEventListener('click', () => {
+        if (!activeRow) return;
+        if (!validateEditForm()) return;
+        applyEditToRow(activeRow);
+        hideAllBackdrops();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hideAllBackdrops();
+    });
+</script>
+
+</body>
+</html>
